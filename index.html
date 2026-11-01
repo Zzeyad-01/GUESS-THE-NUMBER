@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Guess The Number - A futuristic cyber battle between Human and PC. Can you outsmart the AI?">
+  <title>GUESS THE NUMBER | Cyber PC Battle</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background Cyber Canvas & Glow Grid -->
+  <div class="cyber-background" aria-hidden="true">
+    <div class="ambient-glow glow-cyan"></div>
+    <div class="ambient-glow glow-purple"></div>
+    <div class="cyber-grid"></div>
+    <div class="particles-container" id="bgParticles"></div>
+  </div>
+
+  <!-- Confetti Canvas for Victory -->
+  <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Main Container -->
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="20" height="12" rx="4"></rect>
+            <path d="M6 12h4m-2-2v4"></path>
+            <circle cx="15" cy="10" r="1" fill="currentColor"></circle>
+            <circle cx="17" cy="13" r="1" fill="currentColor"></circle>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1 class="main-title">GUESS THE NUMBER</h1>
+          <p class="main-subtitle">Can You Outsmart The PC?</p>
+        </div>
+      </div>
+
+      <!-- Top Quick Controls & Stats -->
+      <div class="header-controls">
+        <div class="stat-pill best-score-pill" title="Fewest attempts in a single round">
+          <span class="pill-icon">🏆</span>
+          <span class="pill-label">BEST:</span>
+          <span class="pill-value" id="bestScoreValue">--</span>
+        </div>
+
+        <button id="soundToggleBtn" class="icon-btn" aria-label="Toggle Sound" title="Sound: ON">
+          <svg id="soundIconOn" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="soundIconOff" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <button id="historyToggleBtn" class="icon-btn" aria-label="Game History" title="View Rounds History">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="historyBadge" class="badge-count">0</span>
+        </button>
+
+        <button id="helpToggleBtn" class="icon-btn" aria-label="How to play" title="Game Rules">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Card -->
+    <main class="game-arena">
+      <!-- Left / Top: PC Opponent Station -->
+      <section class="pc-opponent-card" aria-label="PC Opponent">
+        <div class="pc-avatar-wrapper">
+          <div class="avatar-ring"></div>
+          <div class="avatar-core" id="pcAvatarCore">
+            <!-- Animated Cyber Robot Avatar -->
+            <div class="bot-head">
+              <div class="bot-ears">
+                <span class="ear ear-left"></span>
+                <span class="ear ear-right"></span>
+              </div>
+              <div class="bot-antenna">
+                <span class="antenna-stick"></span>
+                <span class="antenna-ball" id="antennaLight"></span>
+              </div>
+              <div class="bot-screen" id="botScreen">
+                <div class="screen-scanline"></div>
+                <!-- Visor Face Eyes/Expression -->
+                <div class="bot-face" id="botFace">
+                  <span class="eye eye-left"></span>
+                  <span class="eye eye-right"></span>
+                  <span class="bot-mouth" id="botMouth"></span>
+                </div>
+              </div>
+              <div class="bot-cheeks">
+                <span class="cheek cheek-l"></span>
+                <span class="cheek cheek-r"></span>
+              </div>
+            </div>
+          </div>
+          <div class="status-orb" id="statusOrb"></div>
+        </div>
+
+        <div class="pc-meta">
+          <div class="pc-id-tag">
+            <span class="pulse-dot"></span>
+            <span class="bot-name">PC OPPONENT: NEXUS-AI</span>
+          </div>
+          <div class="pc-status" id="pcStatusText">THINKING OF A SECRET NUMBER...</div>
+          <div class="pc-speech-bubble" id="pcSpeechBubble">
+            <p id="pcDialogText">"I have chosen a number inside the range. You will never crack my algorithm!"</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center: Selected Range & Range Visualizer -->
+      <section class="range-display-panel" aria-label="Selected Number Range">
+        <div class="range-panel-header">
+          <div class="range-title-group">
+            <span class="panel-tag">PC GENERATED RANGE</span>
+            <h2 class="range-heading">TARGET BOUNDARIES</h2>
+          </div>
+          <div class="difficulty-tag" id="difficultyTag">
+            <span class="diff-icon" id="diffIcon">⚡</span>
+            <span class="diff-name" id="diffName">MEDIUM</span>
+          </div>
+        </div>
+
+        <!-- Range Min & Max Numbers Display -->
+        <div class="range-boxes-container">
+          <div class="range-box min-box">
+            <span class="range-box-sub">MINIMUM</span>
+            <span class="range-box-num" id="rangeMin">1</span>
+          </div>
+
+          <div class="range-divider">
+            <div class="range-line"></div>
+            <div class="range-vs">TO</div>
+            <div class="range-line"></div>
+          </div>
+
+          <div class="range-box max-box">
+            <span class="range-box-sub">MAXIMUM</span>
+            <span class="range-box-num" id="rangeMax">100</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Narrowing Tracker (Visual Indicator) -->
+        <div class="bounds-tracker" id="boundsTracker">
+          <div class="bounds-labels">
+            <span class="bound-sub">Narrowed Search Bounds:</span>
+            <span class="bound-values" id="narrowedBoundsText">Range: [ 1 — 100 ]</span>
+          </div>
+          <div class="bounds-track">
+            <div class="bounds-fill" id="boundsFill"></div>
+            <div class="bounds-pin pin-low" id="pinLow">1</div>
+            <div class="bounds-pin pin-high" id="pinHigh">100</div>
+          </div>
+          <div class="bounds-stats">
+            <span id="possibleCountText">100 possible numbers remaining</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feedback Area for Hints -->
+      <section class="feedback-section" id="feedbackSection" aria-live="polite">
+        <div class="feedback-card" id="feedbackCard">
+          <div class="feedback-icon-box" id="feedbackIconBox">
+            <span class="feedback-emoji" id="feedbackEmoji">🎯</span>
+          </div>
+          <div class="feedback-content">
+            <div class="feedback-title" id="feedbackTitle">Make Your First Guess!</div>
+            <div class="feedback-desc" id="feedbackDesc">Enter a number between <span id="hintMin">1</span> and <span id="hintMax">100</span> to test your luck.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- User Input & Action Section -->
+      <section class="user-action-panel">
+        <form id="guessForm" class="guess-form" onsubmit="return false;">
+          <div class="input-controls-wrapper">
+            <div class="quick-adjust-buttons">
+              <button type="button" class="quick-btn" id="btnMinus10" title="Minus 10">-10</button>
+              <button type="button" class="quick-btn" id="btnMinus1" title="Minus 1">-1</button>
+            </div>
+
+            <div class="input-field-container">
+              <label for="guessInput" class="visually-hidden">Enter your guess</label>
+              <input 
+                type="number" 
+                id="guessInput" 
+                class="guess-input" 
+                placeholder="Enter your guess" 
+                autocomplete="off" 
+                required 
+              />
+              <span class="input-glow-bar"></span>
+            </div>
+
+            <div class="quick-adjust-buttons">
+              <button type="button" class="quick-btn" id="btnPlus1" title="Plus 1">+1</button>
+              <button type="button" class="quick-btn" id="btnPlus10" title="Plus 10">+10</button>
+            </div>
+          </div>
+
+          <div class="form-action-row">
+            <button type="submit" id="guessBtn" class="btn-primary guess-button">
+              <span class="btn-flare"></span>
+              <span class="btn-text">GUESS</span>
+              <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        <!-- Stats Bar: Attempts Counter & Restart Button -->
+        <div class="game-stats-bar">
+          <div class="attempts-counter-box">
+            <div class="attempts-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v5l3 3"></path>
+              </svg>
+            </div>
+            <div class="attempts-text-col">
+              <span class="attempts-label">TOTAL ATTEMPTS</span>
+              <span class="attempts-number" id="attemptsCount">0</span>
+            </div>
+          </div>
+
+          <div class="game-buttons-group">
+            <button type="button" id="restartBtn" class="btn-secondary restart-button" title="Generate New Range and Secret Number">
+              <svg class="restart-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Restart Game</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Guesses History Chips in Current Round -->
+      <section class="round-guesses-tray" id="roundGuessesTray">
+        <div class="tray-header">
+          <span class="tray-title">Guesses in this round:</span>
+          <span class="tray-empty-hint" id="emptyTrayHint">No guesses yet</span>
+        </div>
+        <div class="guesses-chips-list" id="guessesChipsList">
+          <!-- Dynamic Guess Chips added here -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Cyber Battle: Human vs Nexus-AI • Use <kbd>Enter</kbd> to guess • <kbd>Esc</kbd> to restart</p>
+    </footer>
+  </div>
+
+  <!-- VICTORY MODAL OVERLAY -->
+  <div class="modal-overlay hidden" id="victoryModal" role="dialog" aria-modal="true" aria-labelledby="victoryTitle">
+    <div class="modal-glass-card victory-card">
+      <div class="victory-decorations">
+        <div class="victory-light-burst"></div>
+        <div class="victory-badge-icon">🏆</div>
+      </div>
+
+      <div class="victory-header">
+        <span class="victory-sub">SYSTEM COMPROMISED</span>
+        <h2 class="victory-title" id="victoryTitle">Congratulations! You defeated the PC! 🏆</h2>
+        <p class="victory-tagline">Nexus-AI's secret encryption has been cracked!</p>
+      </div>
+
+      <!-- Secret Number Reveal Showcase -->
+      <div class="secret-reveal-box">
+        <span class="reveal-label">THE SECRET NUMBER WAS</span>
+        <div class="reveal-number" id="revealedSecretNum">--</div>
+        <div class="reveal-glow"></div>
+      </div>
+
+      <!-- Victory Stats Grid -->
+      <div class="victory-stats-grid">
+        <div class="vic-stat-cell">
+          <span class="vic-stat-label">ATTEMPTS</span>
+          <span class="vic-stat-val" id="vicAttempts">0</span>
+        </div>
+        <div class="vic-stat-cell">
+          <span class="vic-stat-label">RANK</span>
+          <span class="vic-stat-val rank-badge" id="vicRank">S</span>
+        </div>
+        <div class="vic-stat-cell">
+          <span class="vic-stat-label">DIFFICULTY</span>
+          <span class="vic-stat-val" id="vicDifficulty">Medium</span>
+        </div>
+        <div class="vic-stat-cell">
+          <span class="vic-stat-label">TIME</span>
+          <span class="vic-stat-val" id="vicTime">00:00</span>
+        </div>
+      </div>
+
+      <div class="victory-actions">
+        <button id="vicNextRoundBtn" class="btn-primary vic-btn">
+          <span class="btn-text">Play Next Round</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        <button id="vicShareBtn" class="btn-secondary vic-share-btn" title="Copy your victory score">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span id="copyBtnText">Copy Result</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME HISTORY MODAL / DRAWER -->
+  <div class="modal-overlay hidden" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="modal-glass-card history-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <h2 class="modal-title" id="historyTitle">Battle Records</h2>
+        </div>
+        <button class="modal-close-btn" id="closeHistoryBtn" aria-label="Close History">✕</button>
+      </div>
+
+      <div class="history-content-scroll">
+        <div class="history-summary-stats">
+          <div class="summary-stat">
+            <span class="sum-label">Total Rounds:</span>
+            <span class="sum-val" id="histTotalRounds">0</span>
+          </div>
+          <div class="summary-stat">
+            <span class="sum-label">Best Record:</span>
+            <span class="sum-val highlight" id="histBestRecord">--</span>
+          </div>
+          <div class="summary-stat">
+            <span class="sum-label">Avg Attempts:</span>
+            <span class="sum-val" id="histAvgAttempts">--</span>
+          </div>
+        </div>
+
+        <div class="history-list" id="historyList">
+          <!-- Rounds injected dynamically -->
+          <div class="empty-history-placeholder">No rounds recorded yet. Outsmart the PC to build your history!</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="clearHistoryBtn" class="btn-danger-link">Clear All Records</button>
+        <button id="dismissHistoryBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY / RULES MODAL -->
+  <div class="modal-overlay hidden" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="modal-glass-card rules-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <h2 class="modal-title" id="rulesTitle">Game Rules & Guide</h2>
+        </div>
+        <button class="modal-close-btn" id="closeRulesBtn" aria-label="Close Rules">✕</button>
+      </div>
+
+      <div class="rules-body">
+        <div class="rule-item">
+          <span class="rule-num">1</span>
+          <div class="rule-info">
+            <h4>Dynamic Random Range</h4>
+            <p>Every single round, the PC randomly chooses a fresh minimum and maximum number. The secret number is always locked inside this range.</p>
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-num">2</span>
+          <div class="rule-info">
+            <h4>Decipher The Feedback</h4>
+            <p>If your guess is higher than the secret number, the PC alerts: <strong class="badge-high">"Too High! هبط شوية 🔽"</strong>.</p>
+            <p>If your guess is lower, the PC alerts: <strong class="badge-low">"Too Low! طلع شوية 🔼"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-num">3</span>
+          <div class="rule-info">
+            <h4>Victory Condition</h4>
+            <p>Match the secret number in the fewest possible attempts to score an <strong>SSS Rank</strong>! The PC reveals its secret number upon defeat.</p>
+          </div>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-num">4</span>
+          <div class="rule-info">
+            <h4>Interactive Bound Tracking</h4>
+            <p>Watch the narrowing search bar to visualize remaining possibilities and optimize your binary search strategy.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="gotItRulesBtn" class="btn-primary" style="width: 100%;">Understood, Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification for Errors / Warnings -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
+
+  <!-- JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
